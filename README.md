@@ -1,2 +1,2 @@
 # pbdw-mapbox
-an amazing map of some amazing architecture :)
+an map in a box of some buildings :)
