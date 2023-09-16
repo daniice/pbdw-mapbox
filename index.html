@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PBDW Mapbox Dani Ball</title>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet">
+</head>
+<body>
+
+<div id="map"></div>
+<div class='map-overlay mobileHide' id="overlay">
+  <div id="yearSort" class="mobileHide">Year:
+  <label for='2010' class='formControl'>
+    <input type='checkbox' class='yrCheck' id='pre2010'>Pre-2010
+  </label>
+    <label for='2020' class='formControl'>
+    <input type='checkbox'class='yrCheck' id='20102020'>2010-2020
+  </label>
+    <label for='2023' class='formControl'>
+    <input type='checkbox' class='yrCheck' id='Post2020'>Post-2020
+  </label>
+    <label for='current' class='formControl'>
+    <input type='checkbox' class='yrCheck' id='InProgress'>In Progress
+  </label>
+    </div>
+  <div id="sorting" class="mobileHide">Type:
+  <label for='Cultural' class='formControl'>
+    <input type='checkbox' class='typeCheck' id='Cultural'>Cultural
+  </label>
+    <label for='Preservation' class='formControl'>
+    <input type='checkbox'class='typeCheck' id='Preservation'>Preservation
+  </label>
+    <label for='Educational' class='formControl'>
+    <input type='checkbox' class='typeCheck' id='Educational'>Educational
+  </label>
+    <label for='Commercial' class='formControl'>
+    <input type='checkbox' class='typeCheck' id='Commercial'>Commercial
+  </label>
+    <label for='Residential' class='formControl'>
+    <input type='checkbox' class='typeCheck' id='Residential'>Residential
+  </label>
+    </div>
+  <div id='flyTo' class="mobileHide">Fly To:
+    <button id="nycButton">NYC, NY</button>
+    <button id="massButton">Williamstown, MA</button>
+    <button id="michButton">Saginaw, MI</button>
+    <button id="ausButton">Sydney, AUS</button>
+  </div>
+</div>
+
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+#map {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+  }
+
+.marker {
+    background-size: cover;
+    width: 33px;
+    height: 33px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    z-index: 1;
+  }
+
+.link {
+text-decoration: none;
+color: rgb(90, 90, 90);
+background: rgba(240, 240, 240, 0.7);
+border-radius: 6px;
+padding: 2px;
+line-height: 140%;
+}
+
+.hide {
+display: none;
+}
+
+.map-overlay {
+position: absolute;
+bottom: 100;
+right: 100;
+font-family: Arial, sans-serif;
+overflow: auto;
+border-radius: 8px;
+padding: 8px;
+z-index; 2900;
+}
+
+#overlay {
+height: 350px;
+width: 135px;
+display: flex;
+flex-direction: column;
+justify-content: space-around;
+gap: 8px;
+z-index; 2900;
+}
+
+#sorting, #flyTo, #yearSort {
+border: 1px black solid;
+border-radius: 8px;
+display: flex;
+flex-direction: column;
+font-size: 11.5px;
+line-height: 17px;
+padding: 4px;
+z-index: 3000;
+background: rgba(240,240,240,0.7);
+gap: 2px;
+}
+
+#flyTo, #yearSort {
+height: 30%;
+}
+
+#sorting {
+height: 35%;
+}
+
+.formControl {
+display: grid;
+grid-template-columns: 1em auto;
+gap: 5px;
+}
+
+input[type="checkbox"] {
+-webkit-appearance: none;
+appearance: none;
+background-color: #fff;
+margin: 0;
+font: inherit;
+color: currentColor;
+width: 1em;
+height: 1em;
+border: 0.5px solid currentColor;
+border-radius: 0.15em;
+transform: translateY(0.125em);
+display: grid;
+place-content: center;
+cursor: pointer;
+}
+
+input[type="checkbox"]::before {
+content: "";
+width: 0.65em;
+height: 0.65em;
+transform: scale(0);
+box-shadow: inset 1em 1em grey;
+}
+
+input[type="checkbox"]:checked::before {
+transform: scale(1);
+transition: 120ms transform ease-in-out;
+transform-origin: bottom left;
+clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+#flyTo button {
+text-decoration: none;
+font-size: 11.5px;
+}
+
+@media screen and (max-width:640px) {
+[id="block-d0847659d9a93ee9edd3"] {
+    padding-left: 0;
+    margin-left: -20px;
+    margin-top: -40px;    }
+}
+</style>
+
+<script>
+  //link to an access token in order to connect to PBDW mapbox account   
+mapboxgl.accessToken = 'pk.eyJ1IjoibXdhdHNvbi1wYmR3YXJjaCIsImEiOiJjbGo3OWNnZTAwamlyM2tzMTA1YWsyb2s3In0.omrzJVCwQr9yuBSsn82lOg';
+
+
+//add an inline data structure of features, each of which specify a point and its coordinates, title, link destination, background image, year and year index, id, and sort and sort indicies
+const geojson = {
+  'type': 'FeatureCollection',
+  'features': [{
+    'type': 'Feature',
+    'geometry': {
+      'type': 'Point',
+      'coordinates': [-73.98855447114859, 40.67647314409779]},
+    'properties': {
+      'title': 'Powerhouse Arts',
+      'link': 'https://www.pbdw.com/powerhouse-arts',         
+      'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1689865046991-XKCXB7ENB0SFGKNI8YEQ/8-2022AV67-142.jpg?format=1500w')",
+      'year': "2022",
+      'yrIndex': "2",
+      'id': "powerhouseArts",
+      'sort': "CulturalPreservation",
+      'sortIndex': "0",
+      'sortIndex2': "1"}},
+    {
+    'type': 'Feature',
+    'geometry': {
+      'type': 'Point',
+      'coordinates': [-73.9660312339461, 40.68041933369312]},
+    'properties': {
+      'title': "Non-profit Media Company",
+      'link': 'https://www.pbdw.com/non-profit-media-headquarters',
+      'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683212502423-MCBZ62KLYPQVBC2RQO1Y/Screen+Shot+2017-06-01+at+2.36.57+PM.png?format=1000w')",
+      'year': "current",
+      'yrIndex': "3",
+      'id': "nonProfitMediaCompany",
+      'sort': "Cultural",
+      'sortIndex': "0",
+      'sortIndex2': "null"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.97527598374903, 40.76510689929196]},
+      'properties': {
+        'title': 'Park Lane Hotel',
+        'link': 'https://www.pbdw.com/park-lane-hotel',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683232290259-S223ZBQXEG6UBQEWWMTQ/PARKLANE_EXTERIOR_0007_v4_MW+Edit.jpg?format=1500w'",
+        'year': "2021",
+        'yrIndex': "2",
+        'id': "parkLaneHotel",
+      'sort': "Commercial",
+      'sortIndex': "3",
+      'sortIndex2': "null"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.94573431767785, 40.798267817714276]},
+      'properties': {
+        'title': 'Cooke School & Institute',
+        'link': 'https://www.pbdw.com/cooke-school-institute',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1664902025259-H4JLUEC27MBA2WPHGV4L/2020FD28_437_RT_LR.jpg?format=1500w')",
+        'year': "2020",
+        'yrIndex': "1",
+        'id': "cookeSchool",
+      'sort': "Educational",
+      'sortIndex': "2",
+      'sortIndex2': "null"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.9576855109429, 40.77706220824147]},
+      'properties': {
+        'title': 'Moise Safra Center',
+        'link': 'https://www.pbdw.com/moise-safra-center',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1681222865429-FVMFBRDF5FFR62TP1CO9/Moise+Safra+Center+stone+fins+and+colored+glass.jpg?format=1000w')",
+        'year': "2019",
+        'yrIndex': "1",
+        'id': "moiseSafra",
+      'sort': "Cultural",
+      'sortIndex': "0",
+      'sortIndex2': "null"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.86857895790146, 40.99586995490029]},
+      'properties': {
+        'title': 'Hillside Elementary School',
+        'link': 'https://www.pbdw.com/hillside-elementary-school',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1681401090288-8W7BE6VLX55PUTIWERAY/2022FD51_906_RT2_LR.jpg?format=1500w')",
+        'year': "2022",
+        'yrIndex': "2",
+        'id': "hillside",
+      'sort': "Educational",
+      'sortIndex': "2",
+      'sortIndex2': "null"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-74.00034996185697, 40.720836757423356]},
+      'properties': {
+        'title': '462 Broadway',
+        'link': 'https://www.pbdw.com/462-broadway',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683220674746-KFVEBFM6HCOEPW7WL9X7/2018FD28_402_HR.jpg?format=1500w')",
+        'year': "2018",
+        'yrIndex': "1",
+        'id': "462Broadway",
+      'sort': "CommercialPreservation",
+      'sortIndex': "3",
+      'sortIndex2': "1"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.90083070203343, 40.900870782296074]},
+      'properties': {
+        'title': 'Riverdale Country School',
+        'link': 'https://www.pbdw.com/riverdale-country-school-overview',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1681324791697-9FGPS8V6KZ4GU5WUERWE/Riverdale+Overview_Photo_Exterior+Toward+AC.jpg?format=1500w')",
+        'year': "2018",
+        'yrIndex': "1",
+        'id': "riverdale",
+      'sort': "Educational",
+      'sortIndex': "2",
+      'sortIndex2': "null"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.95816470351205, 40.78308835969321]},
+      'properties': {
+        'title': "Saint David's School",
+        'link': 'https://www.pbdw.com/saint-davids-school?rq=saint',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1681312875105-JOAQYJXMAMT7AW955BMR/2018FD53_405_RT_LR.jpg?format=1500w')",
+        'year': "2018",
+        'yrIndex': "1",
+        'id': "saintDavidsSchool",
+      'sort': "Educational",
+      'sortIndex': "2",
+      'sortIndex2': "null"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.20309658798419, 42.713049816802176]},
+      'properties': {
+        'title': "Williams College, Fellows Hall",
+        'link': 'https://www.pbdw.com/williams-college',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1681407178387-2U4OLICCS0HWSUQR9V61/2020FD49_435_RT_LR.jpg?format=1500w')",
+        'year': "2019",
+        'yrIndex': "1",
+        'id': "williams",
+      'sort': "Educational",
+      'sortIndex': "2",
+      'sortIndex2': "null"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.97392936109134, 40.779462409999674]},
+      'properties': {
+        'title': "New-York Historical Society",
+        'link': 'https://www.pbdw.com/new-york-historical-society-overview',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1681393621742-5DA4766RETBDZF5DRNG7/_S5J3826.jpg?format=1500w')",
+        'year': "current",
+        'yrIndex': "3",
+        'id': "nyhs",
+      'sort': "CulturalPreservation",
+      'sortIndex': "0",
+      'sortIndex2': "1"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.98429338992835, 40.759423570960315]},
+      'properties': {
+        'title': "20 Times Square",
+        'link': 'https://www.pbdw.com/20-times-square?rq=20',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1592332642294-60KJG4DFJFAVQ7AEIRFZ/2019FD47_408_RT_LR.jpg?format=750w')",
+        'year': "2019",
+        'yrIndex': "1",
+        'id': "20TimesSquare",
+      'sort': "Commercial",
+      'sortIndex': "3",
+      'sortIndex2': "null"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.99405269005442, 40.65809969373435]},
+      'properties': {
+        'title': "Green-Wood",
+        'link': 'https://www.pbdw.com/green-wood-overview',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683060599061-SW0W59W1A0E8UZW0XNQB/GW+Col+walkway_R1.jpg?format=1500w')",
+        'year': "2015",
+        'yrIndex': "1",
+        'id': "greenwood",
+      'sort': "CulturalPreservation",
+      'sortIndex': "0",
+      'sortIndex2': "1"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.97352433900396, 40.669810293199056]},
+      'properties': {
+        'title': "Poly Prep Lower School",
+        'link': 'https://www.pbdw.com/poly-prep-lower-school',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683227962920-TA4W23FEFJUDHZ82XSGM/PolyPrep+North+Exterior+3.jpg?format=1500w')",
+        'year': "2009",
+        'yrIndex': "0",
+        'id': "polyPrep",
+      'sort': "EducationalPreservation",
+      'sortIndex': "2",
+      'sortIndex2': "1"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.98830657653546, 40.756919093542805]},
+      'properties': {
+        'title': "New 42 Studios",
+        'link': 'https://www.pbdw.com/new-42',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683226468609-K9T8DT7ZTSZ7LCM6XBOL/N42+Building+7_R1.jpg?format=750w')",
+        'year': "2000",
+        'yrIndex': "0",
+        'id': "new42",
+      'sort': "Cultural",
+      'sortIndex': "0",
+      'sortIndex2': "null"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.98842864771122, 40.71416608073766]},
+      'properties': {
+        'title': "Educational Alliance",
+        'link': 'https://www.pbdw.com/educational-alliance',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683231720572-0H7IYXXQ6HMM0F7LFQ11/tea_ext.jpg?format=500w')",
+        'year': "2014",
+        'yrIndex': "1",
+        'id': "educationalAlliance",
+      'sort': "CulturalEducational",
+      'sortIndex': "0",
+      'sortIndex2': "2"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.98245316119689, 40.736479944767666]},
+      'properties': {
+        'title': "Learning Spring School",
+        'link': 'https://www.pbdw.com/learningspring-school',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1663597193564-ZI7DKL6MH1KAHNS0ZAGO/FChas_210-04-58_1266_feb2013.jpg?format=750w')",
+        'year': "2010",
+        'yrIndex': "1",
+        'id': "learningSpring",
+      'sort': "Educational",
+      'sortIndex': "2",
+      'sortIndex2': "null"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-74.0022584476007, 40.754794042783736]},
+      'properties': {
+        'title': "Equinox Hudson Yards",
+        'link': 'https://www.pbdw.com/equinox-interiors',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683230430875-W5H5SYYQ9QN9P5P0AF27/IMG_0446.jpg?format=1000w')",
+        'year': "unknown",
+        'yrIndex': "2",
+        'id': "equinoxHudsonYards",
+      'sort': "Commercial",
+      'sortIndex': "3",
+      'sortIndex2': "null"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.99051457458546, 40.7294257865997]},
+      'properties': {
+        'title': "Cooper Union",
+        'link': 'https://www.pbdw.com/cooper-union',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1682527806523-8SI4L2E9QF46OAEE4W8O/Cooper+North+Facade+2_R1.jpg?format=750w')",
+        'year': "2001",
+        'yrIndex': "0",
+        'id': "cooperUnion",
+      'sort': "CulturalPreservation",
+      'sortIndex': "0",
+      'sortIndex2': "1"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.89776066495695, 41.68673529065913]},
+      'properties': {
+        'title': "Vassar College Art Library",
+        'link': 'https://www.pbdw.com/vassar-college-van-ingen-art-library',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683058353333-G4BZG545VW2TDHIR4V4U/Glass+Block+Wall.jpg?format=1500w')",
+        'year': "2009",
+        'yrIndex': "0",
+        'id': "vassarLibrary",
+      'sort': "EducationalPreservation",
+      'sortIndex': "2",
+      'sortIndex2': "1"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.88917325923514, 40.86134952638138]},
+      'properties': {
+        'title': "Fordham University, Duane Library",
+        'link': 'https://www.pbdw.com/fordham-university-duane-library',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683226244328-KCY4QYPNY8BUT7RPJSSV/Duane+Sunny+Tower.jpg?format=1500w')",
+        'year': "2004",
+        'yrIndex': "0",
+        'id': "fordhamLibrary",
+      'sort': "Educational",
+      'sortIndex': "2",
+      'sortIndex2': "null"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.95103547652573, 40.79280225968745]},
+      'properties': {
+        'title': "Reece School",
+        'link': 'https://www.pbdw.com/reece-school',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1682696207319-1O70V1F11IDNLUTUAVZL/Reece-Facade-Night.jpg?format=750w')",
+        'year': "2006",
+        'yrIndex': "0",
+        'id': "reeceSchool",
+      'sort': "Educational",
+      'sortIndex': "2",
+      'sortIndex2': "null"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.86149754574825, 40.75475817010578]},
+      'properties': {
+        'title': "Louis Armstrong House Museum",
+        'link': 'https://www.pbdw.com/louis-armstrong-house-museum',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1682691555415-5RW8H9CADNX5YIHEB01S/armstrong+office_R1.jpg?format=1500w')",
+        'year': "2003",
+        'yrIndex': "0",
+        'id': "louisArmstrong",
+      'sort': "CulturalPreservation",
+      'sortIndex': "0",
+      'sortIndex2': "1"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.98220542209029, 40.75237154886137]},
+      'properties': {
+        'title': "Knox Building",
+        'link': 'https://www.pbdw.com/knox-building',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683231046117-3ZAR139SJYZ48SSMO0FU/_S5J1697+copy_R1.jpg?format=750w')",
+        'year': "2010",
+        'yrIndex': "0",
+        'id': "knox",
+      'sort': "CommercialPreservation",
+      'sortIndex': "3",
+      'sortIndex2': "1"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.96636627458386, 40.76395274537476]},
+      'properties': {
+        'title': "Andrew W. Mellon Foundation",
+        'link': 'https://www.pbdw.com/andrew-mellon-foundation',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1682526751708-5ZH66BKTEHVGKISCBEF9/Mellon+Rear+Facade+1.jpg?format=500w')",
+        'year': "2006",
+        'yrIndex': "0",
+        'id': "andrewMellon",
+      'sort': "Cultural",
+      'sortIndex': "0",
+      'sortIndex2': "null"}},
+       {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.98446614399407, 40.75907634219422]},
+      'properties': {
+        'title': "Palace Theatre",
+        'link': 'https://www.pbdw.com/palace-theatre',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683216125364-OH4ZYHNBFH7DUXD30LBK/PBDWArchitects_Palace+Theatre.jpg?format=1500w')",
+        'year': "current",
+        'yrIndex': "3",
+        'id': "palace",
+      'sort': "CulturalPreservation",
+      'sortIndex': "0",
+      'sortIndex2': "1"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.98331887643782, 40.7314988424319]},
+      'properties': {
+        'title': "14 St Y",
+        'link': 'https://www.pbdw.com/14-street-y',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1681403061562-0YF8RQLMA4SAA3CY5M3K/14th_Y_1+High+Res.jpg?format=500w')",
+        'year': "current",
+        'yrIndex': "3",
+        'id': "14Y",
+      'sort': "CulturalEducational",
+      'sortIndex': "0",
+      'sortIndex2': "2"}},
+      {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-83.95367757973501, 43.424167267380646]},
+      'properties': {
+        'title': "Saginaw Art Museum",
+        'link': 'https://www.pbdw.com/saginaw-art-museum',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1682696782174-NIWKV6CJH9X68U40Y5ZJ/Saginaw+Exhibition+Wing+4_R2+%281%29.jpg?format=1500w')",
+        'year': "2004",
+        'yrIndex': "0",
+        'id': "saginawArtMuseum",
+      'sort': "Cultural",
+      'sortIndex': "0",
+      'sortIndex2': "null"}},
+   {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.97044030567409, 40.75979719623821]},
+      'properties': {
+        'title': "Central Synagogue",
+        'link': 'https://www.pbdw.com/central-synagogue',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683220084679-9TASZCIE143IEIGRJLLL/cs-entrance-ext-1.jpg?format=1500w')",
+        'year': "current",
+        'yrIndex': "3",
+        'id': "centralSynagogue",
+      'sort': "Cultural",
+      'sortIndex': "0",
+      'sortIndex2': "null"}},
+{
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-74.00398351468365, 40.751100981156476]},
+      'properties': {
+        'title': "Cedar Lake Ensemble",
+        'link': 'https://www.pbdw.com/cedar-lake-ensemble',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683219399737-FY7WZV8F8KVWEU54BRJY/Cedar+Facade+Dusk+2_R1.jpg?format=1500w')",
+        'year': "2010",
+        'yrIndex': "1",
+        'id': "cedarLakeEnsemble",
+      'sort': "Cultural",
+      'sortIndex': "0",
+      'sortIndex2': "null"}},
+{
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-74.00625040617052, 40.72366368697118]},
+      'properties': {
+        'title': "American Numismatic Society",
+        'link': 'https://www.pbdw.com/american-numismatic-society',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1681752454467-THUBLX3N10WVFCOAZ2J5/American+Nusimatic+Society_Photo_Library.jpg?format=1500w')",
+        'year': "2008",
+        'yrIndex': "0",
+        'id': "ans",
+      'sort': "Cultural",
+      'sortIndex': "0",
+      'sortIndex2': "null"}},
+{
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.98754676149755, 40.74503489745879]},
+      'properties': {
+        'title': "250 Fifth Avenue",
+        'link': 'https://www.pbdw.com/250-fifth-avenue?rq=250',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1681748648906-U8HV4R2G383RJHC1SSK6/south-elevation.jpg?format=1500w')",
+        'year': "current",
+        'yrIndex': "3",
+        'id': "250fifth",
+      'sort': "Commercial",
+      'sortIndex': "3",
+      'sortIndex2': "null"}},
+{
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.96667579698574, 40.80432660371634]},
+      'properties': {
+        'title': "Broadway + 110",
+        'link': 'https://www.pbdw.com/broadway-110',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1682698477610-E5X9DJ0RTSUJ6YOV7JE0/Bway+110+Corner+Up+Broadway_R1.jpg?format=750w')",
+        'year': "2007",
+        'yrIndex': "0",
+        'id': "broadway110",
+      'sort': "CommercialResidential",
+      'sortIndex': "3",
+      'sortIndex2': "4"}},
+{
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-74.00178455455065, 40.73795138852946]},
+      'properties': {
+        'title': "Equinox Greenwich Village Flagship",
+        'link': 'https://www.pbdw.com/equinox-greenwich-village-flagship',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683228409376-C2OBYSFIZW079QBLLL57/Eqx+Greenwich+Exterior_R1.jpg?format=1500w')",
+        'year': "2002",
+        'yrIndex': "0",
+        'id': "equinoxGreenwich",
+      'sort': "Commercial",
+      'sortIndex': "3",
+      'sortIndex2': "null"}},
+{
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-72.30269528895315, 40.93950490656859]},
+      'properties': {
+        'title': "Bridgehampton Residences",
+        'link': 'https://www.pbdw.com/bridgehampton-residences',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1681745802705-ZHAHQ1GSTAK6EWPCVYF5/Bridgehampton+Residences_Photo_Main+House.jpg?format=1500w')",
+        'year': "2007",
+        'yrIndex': "0",
+        'id': "bridgehamptonResidences",
+      'sort': "Residential",
+      'sortIndex': "4",
+      'sortIndex2': "null"}},
+{
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.90531631714425, 41.93285718785509]},
+      'properties': {
+        'title': "Astor Courts",
+        'link': 'https://www.pbdw.com/astor-courts',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1682527263868-JRWZS1NFSP7ETJK1AWX4/Astor_01.jpg?format=1500w')",
+        'year': "2023",
+        'yrIndex': "2",
+        'id': "astorCourts",
+      'sort': "ResidentialPreservation",
+      'sortIndex': "4",
+      'sortIndex2': "1"}},
+{
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [151.2103228844275, -33.862477456282406]},
+      'properties': {
+        'title': "Pittwater House",
+        'link': 'https://www.pbdw.com/pittwater-house',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1681825659027-H7A45SCL5WC418EEBPBR/DUSK_DRONE_HERO.jpg?format=1500w')",
+        'year': "2005",
+        'yrIndex': "0",
+        'id': "pittwaterHouse",
+      'sort': "Residential",
+      'sortIndex': "4",
+      'sortIndex2': "null"}},
+{
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.94485455964599, 40.80610593204829]},
+      'properties': {
+        'title': "1 West 123rd Street",
+        'link': 'https://www.pbdw.com/1-west-123rd-street',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1681849273061-FH73BVK2MRC3XRHO4YG5/WALLEN+Dining+Room+LR.jpg?format=1500w')",
+        'year': "2021",
+        'yrIndex': "2",
+        'id': "1w123",
+      'sort': "ResidentialPreservation",
+      'sortIndex': "4",
+      'sortIndex2': "1"}},
+{
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.95604370382445, 40.78425697828793]},
+      'properties': {
+        'title': "47 East 91st Street",
+        'link': 'https://www.pbdw.com/47-east-91st-street?rq=91st',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1682522374513-61VXB9FKASK06ZV155IL/91st+Full+Exterior.jpg?format=1000w')",
+        'year': "2005",
+        'yrIndex': "0",
+        'id': "47e91",
+      'sort': "Residential",
+      'sortIndex': "4",
+      'sortIndex2': "null"}},
+{
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-74.00519636269166, 40.72949711602774]},
+      'properties': {
+        'title': "Greenwich Village Townhouse",
+        'link': 'https://www.pbdw.com/greenwich-village-townhouse',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1682527948609-AAJJBBJ7SG5PIHCTHZTI/W11+Rear+Exterior_R1.jpg?format=1500w')",
+        'year': "2003",
+        'yrIndex': "0",
+        'id': "greenwichTownhouse",
+      'sort': "Residential",
+      'sortIndex': "4",
+      'sortIndex2': "null"}},
+{
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-72.24353592042041, 40.9369548089541]},
+      'properties': {
+        'title': "Wainscott Residence",
+        'link': 'https://www.pbdw.com/wainscott-residence',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683059660754-JMPO5MEO2KC2V3GDWLHB/_83A0075.jpg?format=1500w')",
+        'year': "2017",
+        'yrIndex': "1",
+        'id': "wainscottResidence",
+      'sort': "Residential",
+      'sortIndex': "4",
+      'sortIndex2': "null"}},
+{
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-74.08283915520634, 41.98406985243893]},
+      'properties': {
+        'title': "The Orchard",
+        'link': 'https://www.pbdw.com/the-orchard',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683221567896-YQYGQZSM0W9UDZC1MOZ9/_S5J0247+copy.jpg?format=1500w')",
+        'year': "2015",
+        'yrIndex': "1",
+        'id': "theOrchard",
+      'sort': "Residential",
+      'sortIndex': "4",
+      'sortIndex2': "null"}},
+{
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.5561127498267, 40.887226254498465]},
+      'properties': {
+        'title': "Barberry’s",
+        'link': 'https://www.pbdw.com/barberrys',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1682527490827-2ZN0THZIN9F79TD4LSRF/_83A4690+copy.jpg?format=1500w')",
+        'year': "2012",
+        'yrIndex': "1",
+        'id': "barberrys",
+      'sort': "ResidentialPreservation",
+      'sortIndex': "4",
+      'sortIndex2': "1"}},
+{
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-72.27778583030411, 40.92522736966984]},
+      'properties': {
+        'title': "Sagaponack Residence",
+        'link': 'https://www.pbdw.com/sagaponack-residence',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683557174736-HVMIYF12IVGZ07GQSWGM/_52A0701.jpg?format=1500w')",
+        'year': "2017",
+        'yrIndex': "1",
+        'id': "sagaponackResidence",
+      'sort': "Residential",
+      'sortIndex': "4",
+      'sortIndex2': "null"}},
+{
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-72.29706854309917, 40.938924845098946]},
+      'properties': {
+        'title': "Halsey Lane Residence",
+        'link': 'https://www.pbdw.com/halsey-lane-residence?rq=Halsey',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683558294472-T23G2MCE0FL2UQJXTL1Z/Silverman+Exterior.jpg?format=1500w')",
+        'year': "2007",
+        'yrIndex': "0",
+        'id': "halseyResidence",
+      'sort': "Residential",
+      'sortIndex': "4",
+      'sortIndex2': "null"}},
+{
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.43881737098796, 44.184273860891295]},
+      'properties': {
+        'title': "Lake Champlain Residence",
+        'link': 'https://www.pbdw.com/lake-champlain-private-residence?rq=Lake',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1681827182174-7QVO5SZTC77WFUP3FTOT/Davis+Exterior_R2.jpg?format=1500w')",
+        'year': "2003",
+        'yrIndex': "0",
+        'id': "champlainResidence",
+      'sort': "Residential",
+      'sortIndex': "4",
+      'sortIndex2': "null"}},
+               {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.98667140794898, 40.74219954022716]},
+      'properties': {
+        'title': "Appellate Division Courthouse",
+        'link': 'https://www.pbdw.com/appellate-division-courthouse',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1681758764220-9NHZ1SQOIW8DEUYJWV1Y/Appellate+Division+Courthouse_Photo_Exterior.jpg?format=1500w')",
+        'year': "2004",
+        'yrIndex': "0",
+        'id': "appellateCourthouse",
+      'sort': "Preservation",
+      'sortIndex': "1",
+      'sortIndex2': "null"}},
+               {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.96568946149608, 40.77212892191184]},
+      'properties': {
+        'title': "19 East 72nd Street",
+        'link': 'https://www.pbdw.com/19-east-72nd-street',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1681745733699-XVXFDYALP49SFGXPZDDO/19+East+72nd+St_Photo_Lobby+Seating.jpg?format=750w')",
+        'year': "2012",
+        'yrIndex': "1",
+        'id': "19e72nd",
+      'sort': "Preservation",
+      'sortIndex': "1",
+      'sortIndex2': "null"}},
+               {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-74.04869095428879, 40.067036158479546]},
+      'properties': {
+        'title': "Bay Head Yacht Club",
+        'link': 'https://www.pbdw.com/bay-head-yacht-club',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683219721599-Z3Z4AQN83X4CZ63KQ5SZ/_83A5322+copy.jpg?format=1500w')",
+        'year': "2015",
+        'yrIndex': "1",
+        'id': "bayHead",
+      'sort': "Preservation",
+      'sortIndex': "1",
+      'sortIndex2': "null"}},
+               {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.96652843029916, 40.75346629657922]},
+      'properties': {
+        'title': "Residence of an Ambassador",
+        'link': 'https://www.pbdw.com/residence-of-an-ambassador-united-nations',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1682694788261-I81G4N8O8Q24B0JILBSZ/Japanese+Mission+Exterior_R2.jpg?format=1000w')",
+        'year': "2003",
+        'yrIndex': "0",
+        'id': "ambassador",
+      'sort': "ResidentialPreservation",
+      'sortIndex': "4",
+      'sortIndex2': "1"}},
+                {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.96565276109187, 40.76740913063728]},
+      'properties': {
+        'title': "Park Avenue Armory",
+        'link': 'https://www.pbdw.com/park-avenue-armory-overview-1',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683219323680-0VZLXKEA5EUYCIO5G5DU/PAA_2012_JamesEwing-2692-edit.jpg?format=1500w')",
+        'year': "current",
+        'yrIndex': "3",
+        'id': "parkAvenueArmory",
+      'sort': "CulturalPreservation",
+      'sortIndex': "0",
+      'sortIndex2': "1"}},
+                {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.95707004574679, 40.78421736722378]},
+      'properties': {
+        'title': "Spence School",
+        'link': 'https://www.pbdw.com/spence-school',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1682697515276-Y76A1I7KPQD7CFXCPY01/Spence+Rear+Yard.jpg?format=750w')",
+        'year': "2004",
+        'yrIndex': "0",
+        'id': "spenceSchool",
+      'sort': "Educational",
+      'sortIndex': "2",
+      'sortIndex2': "null"}},
+                {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.96124803806502, 40.7802009884759]},
+      'properties': {
+        'title': "Marymount School",
+        'link': 'https://www.pbdw.com/marymount-school',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1682692062314-9MH9FL2627MND2ZFXZEF/_52A5570+copy.jpg?format=1500w')",
+        'year': "2012",
+        'yrIndex': "1",
+        'id': "marymountSchool",
+      'sort': "EducationalPreservation",
+      'sortIndex': "2",
+      'sortIndex2': "1"}},
+               {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.98543802362998, 40.75162982156385]},
+      'properties': {
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/cbcfa3ba-5df1-4833-9786-8d392bcd4244/PBDW+Square+Logo_White+on+Black.jpg?format=1500w')",
+        'id': "pbdw"}}
+      ]
+};
+
+//initiate array of markers
+var mapboxMarkers = [];
+
+//initiate a mapbox map object with the linked map style, centered at a certain location with a starting zoom value as specified
+const map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/light-v11',
+  center: [-73.99673217464616, 40.73510867149008],
+  zoom: 11
+});
+
+//iterate through all features in the dataset, creating an element (el) for each, styled with .marker attributes and with the following functionalities
+for (const feature of geojson.features) {
+  const el = document.createElement('div');
+  el.className = 'marker';
+  //display the background property as the background image
+  el.style.backgroundImage = feature.properties.background;
+  
+  //create a link element with the destination specified in the 'link' data property and text content specified in the 'title' data property, styled with .link attributes
+  let link = document.createElement('a');
+  link.href = feature.properties.link;
+  link.textContent = feature.properties.title;
+  link.className = 'link';
+  //set link to open in new tab
+  link.target = '_blank';
+  
+  //append the link to the element
+  el.appendChild(link);
+  //hide the link to start
+  el.children[0].classList.add('hide');
+  //add event listeners to cause link to become a slightly lighter grey when hovered over and return back to normal afterwards
+  el.children[0].addEventListener('mouseover', () => {
+    el.children[0].style.color = 'rgb(135, 135, 135)';
+  })
+  el.children[0].addEventListener('mouseleave', () => {
+    el.children[0].style.color = 'rgb(90, 90, 90)';
+  })
+        
+  //add an event listener for zoom change, hiding any links that are showing when zoom commences
+  map.on('zoom', function () {
+    var zoomLevel = map.getZoom();
+    el.children[0].classList.add('hide');
+      
+    //on each zoom change, if zoom level is less than 10.25, hide background images and render each element as an empty circle with a black border 3px in diameter
+    if (zoomLevel < 10.25) {
+      el.style.backgroundSize = '0 0';
+      el.style.border = '0.1px solid black';
+      el.style.width = '3px';
+      el.style.height = '3px';
+    }
+     
+    //if zoom level is greater than 10.25, render each element as a borderless circle displaying the background image, sized according to how zoomed the screen is
+    if (zoomLevel >= 10.25) {
+      el.style.border = 'none';
+      el.style.backgroundSize = 'cover';
+      el.style.width = `${(zoomLevel-8)*11}px`;
+      el.style.height = `${(zoomLevel-8)*11}px`;
+    }
+  })
+            
+  //when zoom is greater than 10.25, create an event listener on each element that increases size, adds a white border, brings element to front, and displays link and title upon hover
+  el.addEventListener('mouseover', () => {
+    if (map.getZoom()>=10.25){
+      el.style.width = '100px';
+      el.style.height = '100px';
+      el.style.border = '2px solid white';
+      el.style.zIndex = '1000';
+      el.children[0].classList.remove('hide');
+    }
+  })
+    
+  //remove the above stylings when hover ends
+  el.addEventListener('mouseleave', () => {
+    if (map.getZoom()>=10.25){
+      el.style.width = `${(map.getZoom()-8)*11}px`;
+      el.style.height = `${(map.getZoom()-8)*11}px`;
+      el.style.border = 'none';
+      el.style.zIndex = '1';
+      el.children[0].classList.add('hide');
+    }
+  })
+              
+  //make a marker for the feature and add it to the map
+  var mapboxMarker = new mapboxgl.Marker(el)
+    .setLngLat(feature.geometry.coordinates)
+    .addTo(map);
+  
+  //add an id to the marker to correspond with the feature, push marker to marker array
+  mapboxMarker.markerId = feature.properties.id;
+  mapboxMarkers.push(mapboxMarker);
+}
+
+//retrieve all elements with a mobileHide class and hide them on small screens
+mobileHide = Array.from(document.querySelectorAll('.mobileHide'));
+  let w = window.innerWidth;
+if (Number(w)<640) {
+  mobileHide.forEach((hidden) => {
+    hidden.style.display = "none";
+  })}
+
+else {
+// for large screens, sort markers that are shown on map by year and type
+//initialize two checkbox arrays
+typeChecks = Array.from(document.querySelectorAll('.typeCheck'));
+yrChecks = Array.from(document.querySelectorAll('.yrCheck'));
+//set behavior for typeChecks
+//set all as checked to begin
+typeChecks.forEach((check) => {
+    check.checked = true;
+    //add event listener on change of all sort checkboxes
+    check.addEventListener('change', () => {
+       //for each feature, retrieve the sort indicies and year index
+       for (const feature of geojson.features) {
+         let sortIndex = typeChecks[Number(feature.properties.sortIndex)];
+         let sortIndex2 = typeChecks[Number(feature.properties.sortIndex2)];
+         //store the checked property as a separate variable for case of a null sortIndex2
+         let sortIndex2Check = false;
+         if (sortIndex2) sortIndex2Check = sortIndex2.checked;
+         let yrIndex = yrChecks[Number(feature.properties.yrIndex)];
+           //see if either one of the sort properties and the year property are checked boxes, check for point with !sortIndex to display PBDW marker always
+           if ((sortIndex && (sortIndex.checked || sortIndex2Check) && yrIndex.checked  || !sortIndex)) {
+             let markerToShow;
+             //if so, show the corresponding marker by finding the marker in the marker array with an id that matches the feature's id property
+             for (let i=0; i<mapboxMarkers.length; i++) {
+                if (mapboxMarkers[i].markerId === feature.properties.id) {
+                   markerToShow = mapboxMarkers[i];
+                   markerToShow.getElement().classList.remove('hide');
+                   break;
+                }
+             }
+           }
+           //if not, hide the marker
+           else {
+             var markerToHide;
+             for (var i=0; i<mapboxMarkers.length; i++) {
+                if (mapboxMarkers[i].markerId === feature.properties.id) {
+                   markerToHide = mapboxMarkers[i];
+                   markerToHide.getElement().classList.add('hide');
+                   break;
+                }
+             }
+           }
+       }
+    })
+  })
+//do the same for the year checkboxes
+yrChecks.forEach((check) => {
+    check.checked = true;
+    check.addEventListener('change', () => {
+       for (const feature of geojson.features) {
+         let sortIndex = typeChecks[Number(feature.properties.sortIndex)];
+         let sortIndex2 = typeChecks[Number(feature.properties.sortIndex2)];
+         let sortIndex2Check = false;
+         if (sortIndex2) sortIndex2Check = sortIndex2.checked;
+         let yrIndex = yrChecks[Number(feature.properties.yrIndex)];
+           if ((yrIndex && sortIndex && (sortIndex.checked || sortIndex2Check) && yrIndex.checked || !yrIndex)) {
+             var markerToShow;
+             for (var i=0; i<mapboxMarkers.length; i++) {
+                if (mapboxMarkers[i].markerId === feature.properties.id) {
+                   markerToShow = mapboxMarkers[i];
+                   markerToShow.getElement().classList.remove('hide');
+                   break;
+                }
+             }
+           }
+           else {
+             var markerToHide;
+             for (var i=0; i<mapboxMarkers.length; i++) {
+                if (mapboxMarkers[i].markerId === feature.properties.id) {
+                   markerToHide = mapboxMarkers[i];
+                   markerToHide.getElement().classList.add('hide');
+                   break;
+                }
+             }
+           }
+       }
+    })
+  })
+  
+//declare all zoom buttons
+nycButton = document.querySelector('#nycButton');
+massButton = document.querySelector('#massButton');
+michButton = document.querySelector('#michButton');
+ausButton = document.querySelector('#ausButton');
+
+//fly the center of the mapbox to the location of each button upon click
+nycButton.addEventListener('click', () => {
+  map.flyTo({
+  center: [-73.99673217464616, 40.73510867149008],
+  zoom: 10.3,
+  duration: 12000,
+  easing: function (t) {
+return 1 - Math.pow(1 - t, 5);
+},
+});
+})
+
+massButton.addEventListener('click', () => {
+  map.flyTo({
+  center: [-73.20309658798419, 42.713049816802176],
+  zoom: 10.3,
+  duration: 12000,
+  easing: function (t) {
+return 1 - Math.pow(1 - t, 5);
+},
+});
+})
+
+michButton.addEventListener('click', () => {
+  map.flyTo({
+  center: [-83.95367757973501, 43.424167267380646],
+  zoom: 10.3,
+  duration: 12000,
+  easing: function (t) {
+return 1 - Math.pow(1 - t, 5);
+},
+});
+})
+
+ausButton.addEventListener('click', () => {
+  map.flyTo({
+  center: [151.2103228844275, -33.862477456282406],
+  zoom: 10.3,
+  duration: 12000,
+  easing: function (t) {
+return 1 - Math.pow(1 - t, 5);
+},
+});
+})
+}
+
+</script>
+
+</body>
