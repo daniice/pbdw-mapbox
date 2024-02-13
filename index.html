@@ -10,8 +10,10 @@
 <body>
 
 <div id="map"></div>
-<div class='map-overlay mobileHide' id="overlay">
-  <div id="yearSort" class="mobileHide">Year:
+<div class='map-overlay'>
+  <div class='advSort'><i class="fa fa-filter" style="font-size:18px;color:grey"></i> Advanced Sort</div>
+<div class='drop' id="overlay">
+  <div id="yearSort">Year:
   <label for='2010' class='formControl'>
     <input type='checkbox' class='yrCheck' id='pre2010'>Pre-2010
   </label>
@@ -25,7 +27,7 @@
     <input type='checkbox' class='yrCheck' id='InProgress'>In Progress
   </label>
     </div>
-  <div id="sorting" class="mobileHide">Type:
+  <div id="sorting">Type:
   <label for='Cultural' class='formControl'>
     <input type='checkbox' class='typeCheck' id='Cultural'>Cultural
   </label>
@@ -42,148 +44,164 @@
     <input type='checkbox' class='typeCheck' id='Residential'>Residential
   </label>
     </div>
-  <div id='flyTo' class="mobileHide">Fly To:
+  <div id='flyTo'>Fly To:
     <button id="nycButton">NYC, NY</button>
+    <button id="hampButton">Hamptons, NY</button>
     <button id="massButton">Williamstown, MA</button>
     <button id="michButton">Saginaw, MI</button>
     <button id="ausButton">Sydney, AUS</button>
   </div>
 </div>
+</div>
 
 <style>
-  body {
-    margin: 0;
-    padding: 0;
-  }
+body {
+        margin: 0;
+        padding: 0;
+      }
 
 #map {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 100%;
-  }
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+      }
 
 .marker {
-    background-size: cover;
-    width: 33px;
-    height: 33px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    z-index: 1;
-  }
+        background-size: cover;
+        width: 33px;
+        height: 33px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        z-index: 1;
+      }
 
 .link {
-text-decoration: none;
-color: rgb(90, 90, 90);
-background: rgba(240, 240, 240, 0.7);
-border-radius: 6px;
-padding: 2px;
-line-height: 140%;
+  text-decoration: none;
+  color: rgb(90, 90, 90);
+  background: rgba(240, 240, 240, 0.7);
+  border-radius: 6px;
+  padding: 2px;
+  line-height: 140%;
 }
 
 .hide {
-display: none;
+  display: none;
 }
 
 .map-overlay {
-position: absolute;
-bottom: 100;
-right: 100;
-font-family: Arial, sans-serif;
-overflow: auto;
-border-radius: 8px;
-padding: 8px;
-z-index; 2900;
+  position: absolute;
+  right: 100;
+  bottom: 100;
+  font-family: Arial, sans-serif;
+  overflow: auto;
+  border-radius: 8px;
+  padding: 8px;
+  z-index; 2900;
 }
 
 #overlay {
-height: 350px;
-width: 135px;
-display: flex;
-flex-direction: column;
-justify-content: space-around;
-gap: 8px;
-z-index; 2900;
+  height: 370px;
+  width: 135px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  gap: 8px;
+  z-index; 2900;
 }
 
 #sorting, #flyTo, #yearSort {
-border: 1px black solid;
-border-radius: 8px;
-display: flex;
-flex-direction: column;
-font-size: 11.5px;
-line-height: 17px;
-padding: 4px;
-z-index: 3000;
-background: rgba(240,240,240,0.7);
-gap: 2px;
+  border: 1px rgb(200,200,200) solid;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  font-size: 11.5px;
+  line-height: 17px;
+  padding: 4px;
+  z-index: 3000;
+  background: rgba(240,240,240,0.7);
+  gap: 2px;
 }
 
-#flyTo, #yearSort {
-height: 30%;
+#yearSort {
+  height: 30%;
 }
 
-#sorting {
-height: 35%;
+#sorting, #flyTo {
+  height: 35%;
+}
+
+.advSort {
+  padding: 4px;
+  padding-right: 8px;
+  z-index: 3000;
+  background: rgba(240,240,240,0.7);
+  border: 1px rgb(200,200,200) solid;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.advSort:hover {
+  cursor: pointer;
 }
 
 .formControl {
-display: grid;
-grid-template-columns: 1em auto;
-gap: 5px;
+  display: grid;
+  grid-template-columns: 1em auto;
+  gap: 5px;
 }
 
 input[type="checkbox"] {
--webkit-appearance: none;
-appearance: none;
-background-color: #fff;
-margin: 0;
-font: inherit;
-color: currentColor;
-width: 1em;
-height: 1em;
-border: 0.5px solid currentColor;
-border-radius: 0.15em;
-transform: translateY(0.125em);
-display: grid;
-place-content: center;
-cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #fff;
+  margin: 0;
+  font: inherit;
+  color: currentColor;
+  width: 1em;
+  height: 1em;
+  border: 0.5px solid currentColor;
+  border-radius: 0.15em;
+  transform: translateY(0.125em);
+  display: grid;
+  place-content: center;
+  cursor: pointer;
 }
 
 input[type="checkbox"]::before {
-content: "";
-width: 0.65em;
-height: 0.65em;
-transform: scale(0);
-box-shadow: inset 1em 1em grey;
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  transform: scale(0);
+  box-shadow: inset 1em 1em grey;
 }
 
 input[type="checkbox"]:checked::before {
-transform: scale(1);
-transition: 120ms transform ease-in-out;
-transform-origin: bottom left;
-clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  transform: scale(1);
+  transition: 120ms transform ease-in-out;
+  transform-origin: bottom left;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
 }
 
 #flyTo button {
-text-decoration: none;
-font-size: 11.5px;
+  text-decoration: none;
+  font-size: 11.5px;
 }
 
 @media screen and (max-width:640px) {
-[id="block-d0847659d9a93ee9edd3"] {
-    padding-left: 0;
-    margin-left: -20px;
-    margin-top: -40px;    }
+    [id="page-6520201f02838c4d58bc1f71"] {
+        padding-left: 0;
+        margin-left: -20px;
+        margin-top: -40px;    }
 }
 </style>
 
 <script>
-  //link to an access token in order to connect to PBDW mapbox account   
+//link to an access token in order to connect to PBDW mapbox account   
 mapboxgl.accessToken = 'pk.eyJ1IjoibXdhdHNvbi1wYmR3YXJjaCIsImEiOiJjbGo3OWNnZTAwamlyM2tzMTA1YWsyb2s3In0.omrzJVCwQr9yuBSsn82lOg';
 
 
@@ -269,7 +287,7 @@ const geojson = {
       'type': 'Feature',
       'geometry': {
         'type': 'Point',
-        'coordinates': [-73.86857895790146, 40.99586995490029]},
+        'coordinates': [-73.86922740040256, 40.99621945078442]},
       'properties': {
         'title': 'Hillside Elementary School',
         'link': 'https://www.pbdw.com/hillside-elementary-school',
@@ -284,22 +302,7 @@ const geojson = {
       'type': 'Feature',
       'geometry': {
         'type': 'Point',
-        'coordinates': [-74.00034996185697, 40.720836757423356]},
-      'properties': {
-        'title': '462 Broadway',
-        'link': 'https://www.pbdw.com/462-broadway',
-        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683220674746-KFVEBFM6HCOEPW7WL9X7/2018FD28_402_HR.jpg?format=1500w')",
-        'year': "2018",
-        'yrIndex': "1",
-        'id': "462Broadway",
-      'sort': "CommercialPreservation",
-      'sortIndex': "3",
-      'sortIndex2': "1"}},
-      {
-      'type': 'Feature',
-      'geometry': {
-        'type': 'Point',
-        'coordinates': [-73.90083070203343, 40.900870782296074]},
+        'coordinates': [-73.89957811320609, 40.89875433232637]},
       'properties': {
         'title': 'Riverdale Country School',
         'link': 'https://www.pbdw.com/riverdale-country-school-overview',
@@ -314,22 +317,7 @@ const geojson = {
       'type': 'Feature',
       'geometry': {
         'type': 'Point',
-        'coordinates': [-73.95816470351205, 40.78308835969321]},
-      'properties': {
-        'title': "Saint David's School",
-        'link': 'https://www.pbdw.com/saint-davids-school?rq=saint',
-        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1681312875105-JOAQYJXMAMT7AW955BMR/2018FD53_405_RT_LR.jpg?format=1500w')",
-        'year': "2018",
-        'yrIndex': "1",
-        'id': "saintDavidsSchool",
-      'sort': "Educational",
-      'sortIndex': "2",
-      'sortIndex2': "null"}},
-      {
-      'type': 'Feature',
-      'geometry': {
-        'type': 'Point',
-        'coordinates': [-73.20309658798419, 42.713049816802176]},
+        'coordinates': [-73.21042202904044, 42.71255407253422]},
       'properties': {
         'title': "Williams College, Fellows Hall",
         'link': 'https://www.pbdw.com/williams-college',
@@ -344,7 +332,7 @@ const geojson = {
       'type': 'Feature',
       'geometry': {
         'type': 'Point',
-        'coordinates': [-73.97392936109134, 40.779462409999674]},
+        'coordinates': [-73.97408954574485, 40.779242628580214]},
       'properties': {
         'title': "New-York Historical Society",
         'link': 'https://www.pbdw.com/new-york-historical-society-overview',
@@ -389,7 +377,7 @@ const geojson = {
       'type': 'Feature',
       'geometry': {
         'type': 'Point',
-        'coordinates': [-73.97352433900396, 40.669810293199056]},
+        'coordinates': [-73.97319055774173, 40.669411466905075]},
       'properties': {
         'title': "Poly Prep Lower School",
         'link': 'https://www.pbdw.com/poly-prep-lower-school',
@@ -434,7 +422,7 @@ const geojson = {
       'type': 'Feature',
       'geometry': {
         'type': 'Point',
-        'coordinates': [-73.98245316119689, 40.736479944767666]},
+        'coordinates': [-73.98238679025295, 40.73623026046918]},
       'properties': {
         'title': "Learning Spring School",
         'link': 'https://www.pbdw.com/learningspring-school',
@@ -454,8 +442,8 @@ const geojson = {
         'title': "Equinox Hudson Yards",
         'link': 'https://www.pbdw.com/equinox-interiors',
         'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683230430875-W5H5SYYQ9QN9P5P0AF27/IMG_0446.jpg?format=1000w')",
-        'year': "unknown",
-        'yrIndex': "2",
+        'year': "2019",
+        'yrIndex': "1",
         'id': "equinoxHudsonYards",
       'sort': "Commercial",
       'sortIndex': "3",
@@ -479,7 +467,7 @@ const geojson = {
       'type': 'Feature',
       'geometry': {
         'type': 'Point',
-        'coordinates': [-73.89776066495695, 41.68673529065913]},
+        'coordinates': [-73.89679918602904, 41.68788521112437]},
       'properties': {
         'title': "Vassar College Art Library",
         'link': 'https://www.pbdw.com/vassar-college-van-ingen-art-library',
@@ -494,7 +482,7 @@ const geojson = {
       'type': 'Feature',
       'geometry': {
         'type': 'Point',
-        'coordinates': [-73.88917325923514, 40.86134952638138]},
+        'coordinates': [-73.88744370184138, 40.86127812398466]},
       'properties': {
         'title': "Fordham University, Duane Library",
         'link': 'https://www.pbdw.com/fordham-university-duane-library',
@@ -524,7 +512,7 @@ const geojson = {
       'type': 'Feature',
       'geometry': {
         'type': 'Point',
-        'coordinates': [-73.86149754574825, 40.75475817010578]},
+        'coordinates': [-73.86152206197396, 40.75459617224904]},
       'properties': {
         'title': "Louis Armstrong House Museum",
         'link': 'https://www.pbdw.com/louis-armstrong-house-museum',
@@ -539,7 +527,7 @@ const geojson = {
       'type': 'Feature',
       'geometry': {
         'type': 'Point',
-        'coordinates': [-73.98220542209029, 40.75237154886137]},
+        'coordinates': [-73.98212702940441, 40.75222666653893]},
       'properties': {
         'title': "Knox Building",
         'link': 'https://www.pbdw.com/knox-building',
@@ -554,7 +542,7 @@ const geojson = {
       'type': 'Feature',
       'geometry': {
         'type': 'Point',
-        'coordinates': [-73.96636627458386, 40.76395274537476]},
+        'coordinates': [-73.96638169475193, 40.763807312678495]},
       'properties': {
         'title': "Andrew W. Mellon Foundation",
         'link': 'https://www.pbdw.com/andrew-mellon-foundation',
@@ -569,7 +557,7 @@ const geojson = {
       'type': 'Feature',
       'geometry': {
         'type': 'Point',
-        'coordinates': [-73.98446614399407, 40.75907634219422]},
+        'coordinates': [-73.98460511803428, 40.75892361567836]},
       'properties': {
         'title': "Palace Theatre",
         'link': 'https://www.pbdw.com/palace-theatre',
@@ -584,7 +572,7 @@ const geojson = {
       'type': 'Feature',
       'geometry': {
         'type': 'Point',
-        'coordinates': [-73.98331887643782, 40.7314988424319]},
+        'coordinates': [-73.98325041363204, 40.731359203635435]},
       'properties': {
         'title': "14 St Y",
         'link': 'https://www.pbdw.com/14-street-y',
@@ -614,7 +602,7 @@ const geojson = {
       'type': 'Feature',
       'geometry': {
         'type': 'Point',
-        'coordinates': [-73.97044030567409, 40.75979719623821]},
+        'coordinates': [-73.97053793872485, 40.75960103110024]},
       'properties': {
         'title': "Central Synagogue",
         'link': 'https://www.pbdw.com/central-synagogue',
@@ -674,7 +662,7 @@ const geojson = {
       'type': 'Feature',
       'geometry': {
         'type': 'Point',
-        'coordinates': [-73.96667579698574, 40.80432660371634]},
+        'coordinates': [-73.9661488986322, 40.804209718551455]},
       'properties': {
         'title': "Broadway + 110",
         'link': 'https://www.pbdw.com/broadway-110',
@@ -689,7 +677,7 @@ const geojson = {
       'type': 'Feature',
       'geometry': {
         'type': 'Point',
-        'coordinates': [-74.00178455455065, 40.73795138852946]},
+        'coordinates': [-74.00186471570593, 40.73759994634734]},
       'properties': {
         'title': "Equinox Greenwich Village Flagship",
         'link': 'https://www.pbdw.com/equinox-greenwich-village-flagship',
@@ -764,7 +752,7 @@ const geojson = {
       'type': 'Feature',
       'geometry': {
         'type': 'Point',
-        'coordinates': [-73.95604370382445, 40.78425697828793]},
+        'coordinates': [-73.95614443889164, 40.784119295518195]},
       'properties': {
         'title': "47 East 91st Street",
         'link': 'https://www.pbdw.com/47-east-91st-street?rq=91st',
@@ -974,7 +962,7 @@ const geojson = {
       'type': 'Feature',
       'geometry': {
         'type': 'Point',
-        'coordinates': [-73.96124803806502, 40.7802009884759]},
+        'coordinates': [-73.96124439185813, 40.78008047122001]},
       'properties': {
         'title': "Marymount School",
         'link': 'https://www.pbdw.com/marymount-school',
@@ -989,9 +977,85 @@ const geojson = {
       'type': 'Feature',
       'geometry': {
         'type': 'Point',
+        'coordinates': [-73.95056333413467, 40.78286816132583]},
+      'properties': {
+        'title': "Equinox East 92nd Street",
+        'link': 'https://www.pbdw.com/equinox-interiors',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1681504765501-BJ5NYTG8V7XALO8TSCJ0/Equinox+Interiors_Photo_Hallway.jpg?format=750w')",
+        'year': "2016",
+        'yrIndex': "1",
+        'id': "equinoxE92",
+      'sort': "Commercial",
+      'sortIndex': "3",
+      'sortIndex2': "null"}},
+               {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.99706108996011, 40.72421010111026]},
+      'properties': {
+        'title': "Equinox Soho",
+        'link': 'https://www.pbdw.com/equinox-interiors',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/10919146-4609-4ef2-b9fc-f47ca847ae8d/Stairs+Entrance.jpg?format=1500w')",
+        'year': "2007",
+        'yrIndex': "0",
+        'id': "equinoxSoho",
+      'sort': "Commercial",
+      'sortIndex': "3",
+      'sortIndex2': "null"}},
+               {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-74.00034996185697, 40.720836757423356]},
+      'properties': {
+        'title': '462 Broadway',
+        'link': 'https://www.pbdw.com/462-broadway',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1683220674746-KFVEBFM6HCOEPW7WL9X7/2018FD28_402_HR.jpg?format=1500w')",
+        'year': "2018",
+        'yrIndex': "1",
+        'id': "462Broadway",
+      'sort': "CommercialPreservation",
+      'sortIndex': "3",
+      'sortIndex2': "1"}},
+               {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.9582220685897, 40.78294687952975]},
+      'properties': {
+        'title': "Saint David's School",
+        'link': 'https://www.pbdw.com/saint-davids-school?rq=saint',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1681312875105-JOAQYJXMAMT7AW955BMR/2018FD53_405_RT_LR.jpg?format=1500w')",
+        'year': "2018",
+        'yrIndex': "1",
+        'id': "saintDavidsSchool",
+      'sort': "Educational",
+      'sortIndex': "2",
+      'sortIndex2': "null"}},
+                              {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [-73.96678550529556, 40.79020915703744]},
+      'properties': {
+        'title': "Columbia Grammar and Preparatory School",
+        'link': 'https://www.pbdw.com/columbia-grammar-and-preparatory-school',
+        'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/1697051325121-G8ULFDINMF2ZXHWKP8NZ/Columbia_Prep_Library.jpg?format=1000w')",
+        'year': "current",
+        'yrIndex': "3",
+        'id': "CGPS",
+      'sort': "Educational",
+      'sortIndex': "2",
+      'sortIndex2': "null"}},
+               {
+      'type': 'Feature',
+      'geometry': {
+        'type': 'Point',
         'coordinates': [-73.98543802362998, 40.75162982156385]},
       'properties': {
         'background': "url('https://images.squarespace-cdn.com/content/v1/5b60d4cf89c172fef993f19b/cbcfa3ba-5df1-4833-9786-8d392bcd4244/PBDW+Square+Logo_White+on+Black.jpg?format=1500w')",
+        'link': 'https://www.pbdw.com/',
         'id': "pbdw"}}
       ]
 };
@@ -1002,7 +1066,7 @@ var mapboxMarkers = [];
 //initiate a mapbox map object with the linked map style, centered at a certain location with a starting zoom value as specified
 const map = new mapboxgl.Map({
   container: 'map',
-  style: 'mapbox://styles/mapbox/light-v9',
+  style: 'mapbox://styles/mwatson-pbdwarch/clmaqt1lp02zg01madmwmb1ct',
   center: [-73.99673217464616, 40.73510867149008],
   zoom: 11
 });
@@ -1039,10 +1103,10 @@ for (const feature of geojson.features) {
     var zoomLevel = map.getZoom();
     el.children[0].classList.add('hide');
       
-    //on each zoom change, if zoom level is less than 10.25, hide background images and render each element as an empty circle with a black border 3px in diameter
+    //on each zoom change, if zoom level is less than 10.25, hide background images and render each element as a black circle 3px in diameter
     if (zoomLevel < 10.25) {
-      el.style.backgroundSize = '0 0';
       el.style.border = '0.1px solid black';
+      el.style.background = 'black';
       el.style.width = '3px';
       el.style.height = '3px';
     }
@@ -1051,6 +1115,7 @@ for (const feature of geojson.features) {
     if (zoomLevel >= 10.25) {
       el.style.border = 'none';
       el.style.backgroundSize = 'cover';
+      el.style.backgroundImage = feature.properties.background;
       el.style.width = `${(zoomLevel-8)*11}px`;
       el.style.height = `${(zoomLevel-8)*11}px`;
     }
@@ -1088,16 +1153,23 @@ for (const feature of geojson.features) {
   mapboxMarkers.push(mapboxMarker);
 }
 
-//retrieve all elements with a mobileHide class and hide them on small screens
-mobileHide = Array.from(document.querySelectorAll('.mobileHide'));
-  let w = window.innerWidth;
-if (Number(w)<640) {
-  mobileHide.forEach((hidden) => {
+//retrieve all elements with a drop class and hide them to start
+dropdown = Array.from(document.querySelectorAll('.drop'));
+  dropdown.forEach((hidden) => {
     hidden.style.display = "none";
-  })}
-
-else {
-// for large screens, sort markers that are shown on map by year and type
+  })
+//toggle show dropdown and sorting functions on click
+let advSort = document.querySelector('.advSort');
+advSort.addEventListener('click', () => {
+  if (dropdown[0].style.display === "flex") {
+    dropdown.forEach((hidden) => {
+    hidden.style.display = "none";
+  })
+  }
+  else {
+    dropdown.forEach((hidden) => {
+    hidden.style.display = "flex";
+  })
 //initialize two checkbox arrays
 typeChecks = Array.from(document.querySelectorAll('.typeCheck'));
 yrChecks = Array.from(document.querySelectorAll('.yrCheck'));
@@ -1177,6 +1249,7 @@ yrChecks.forEach((check) => {
   
 //declare all zoom buttons
 nycButton = document.querySelector('#nycButton');
+hampButton = document.querySelector('#hampButton');
 massButton = document.querySelector('#massButton');
 michButton = document.querySelector('#michButton');
 ausButton = document.querySelector('#ausButton');
@@ -1185,6 +1258,17 @@ ausButton = document.querySelector('#ausButton');
 nycButton.addEventListener('click', () => {
   map.flyTo({
   center: [-73.99673217464616, 40.73510867149008],
+  zoom: 10.3,
+  duration: 12000,
+  easing: function (t) {
+return 1 - Math.pow(1 - t, 5);
+},
+});
+})
+    
+hampButton.addEventListener('click', () => {
+  map.flyTo({
+  center: [-72.27778583030411, 40.92522736966984],
   zoom: 10.3,
   duration: 12000,
   easing: function (t) {
@@ -1225,8 +1309,6 @@ return 1 - Math.pow(1 - t, 5);
 },
 });
 })
-}
-
+}})
 </script>
-
 </body>
